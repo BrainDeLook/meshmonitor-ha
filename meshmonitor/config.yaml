@@ -1,6 +1,6 @@
 name: "MeshMonitor"
 description: "Meshtastic Monitoring Dashboard"
-version: "4.6.5"
+version: "1.0.6"
 slug: "meshmonitor"
 url: https://github.com/BrainDeLook/meshmonitor-ha
 arch:
@@ -11,16 +11,25 @@ ingress_port: 8099
 panel_icon: mdi:radio-handheld
 panel_title: "MeshMonitor"
 options:
+  connection_type: "tcp"
   MESHTASTIC_NODE_IP: "192.168.1.231"
   MESHTASTIC_TCP_PORT: 4403
+  MESHTASTIC_SERIAL_PORT: "/dev/ttyUSB0"
   SESSION_SECRET: "meshmonitor-secret-key-2024"
   DISABLE_ANONYMOUS: false
 schema:
+  connection_type: list(tcp|serial)
   MESHTASTIC_NODE_IP: str
   MESHTASTIC_TCP_PORT: port
+  MESHTASTIC_SERIAL_PORT: str
   SESSION_SECRET: str
   DISABLE_ANONYMOUS: bool
 ports:
   4404/tcp: 4404
 ports_description:
   4404/tcp: Virtual Node Server (for Meshtastic mobile apps)
+devices:
+  - /dev/ttyUSB0
+  - /dev/ttyUSB1
+  - /dev/ttyACM0
+  - /dev/ttyACM1
