@@ -1,5 +1,7 @@
 # MeshMonitor — Дополнение для Home Assistant
 
+[🇬🇧 English version](README.md)
+
 [![GitHub Release](https://img.shields.io/github/release/BrainDeLook/meshmonitor-ha.svg?style=for-the-badge)](https://github.com/BrainDeLook/meshmonitor-ha/releases)
 [![License](https://img.shields.io/github/license/BrainDeLook/meshmonitor-ha.svg?style=for-the-badge)](LICENSE)
 
@@ -9,7 +11,7 @@
 
 ## Возможности
 
-- 📡 Подключение к ноде Meshtastic по TCP
+- 📡 Подключение к ноде Meshtastic по TCP или USB Serial
 - 🗺️ Карта с позициями узлов в реальном времени
 - 📊 Телеметрия и статистика сети
 - 🔌 **Сервер виртуального узла** — позволяет нескольким мобильным приложениям Meshtastic подключаться одновременно через порт `4404`
@@ -39,14 +41,23 @@
 
 | Параметр | Описание | По умолчанию |
 |----------|----------|--------------|
-| `MESHTASTIC_NODE_IP` | IP адрес ноды Meshtastic | `192.168.1.231` |
-| `MESHTASTIC_TCP_PORT` | TCP порт ноды | `4403` |
+| `connection_type` | Тип подключения: `tcp` или `serial` | `tcp` |
+| `MESHTASTIC_NODE_IP` | IP адрес ноды Meshtastic (режим TCP) | `192.168.1.231` |
+| `MESHTASTIC_TCP_PORT` | TCP порт ноды (режим TCP) | `4403` |
+| `MESHTASTIC_SERIAL_PORT` | Путь к Serial порту (режим Serial) | `/dev/ttyUSB0` |
 | `SESSION_SECRET` | Секретный ключ для сессий | — |
 | `DISABLE_ANONYMOUS` | Требовать вход для просмотра | `false` |
 
+## Подключение по USB Serial
+
+Если нода подключена через USB, выбери `serial` в типе подключения и укажи нужный порт. Поддерживаемые устройства:
+
+- `/dev/ttyUSB0`, `/dev/ttyUSB1`
+- `/dev/ttyACM0`, `/dev/ttyACM1`
+
 ## Сервер виртуального узла
 
-Дополнение открывает порт **4404** как сервер виртуального узла. Это позволяет нескольким мобильным приложениям Meshtastic одновременно подключаться к одной ноде — чего сама нода не поддерживает.
+Дополнение открывает порт **4404** как сервер виртуального узла. Это позволяет нескольким мобильным приложениям Meshtastic одновременно подключаться к одной ноде.
 
 Чтобы подключить мобильное приложение:
 

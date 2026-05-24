@@ -11,7 +11,7 @@ Home Assistant Add-on for [MeshMonitor](https://github.com/Yeraze/meshmonitor) �
 
 ## Features
 
-- 📡 Connect to Meshtastic node via TCP
+- 📡 Connect to Meshtastic node via TCP or USB Serial
 - 🗺️ Live map with node positions
 - 📊 Network telemetry and statistics
 - 🔌 **Virtual Node Server** — allows multiple simultaneous connections from Meshtastic mobile apps on port `4404`
@@ -41,10 +41,19 @@ Home Assistant Add-on for [MeshMonitor](https://github.com/Yeraze/meshmonitor) �
 
 | Option | Description | Default |
 |--------|-------------|---------|
-| `MESHTASTIC_NODE_IP` | IP address of your Meshtastic node | `192.168.1.231` |
-| `MESHTASTIC_TCP_PORT` | TCP port of the node | `4403` |
+| `connection_type` | Connection type: `tcp` or `serial` | `tcp` |
+| `MESHTASTIC_NODE_IP` | IP address of your Meshtastic node (TCP mode) | `192.168.1.231` |
+| `MESHTASTIC_TCP_PORT` | TCP port of the node (TCP mode) | `4403` |
+| `MESHTASTIC_SERIAL_PORT` | Serial port path (Serial mode) | `/dev/ttyUSB0` |
 | `SESSION_SECRET` | Secret key for session encryption | — |
 | `DISABLE_ANONYMOUS` | Require login to view dashboard | `false` |
+
+## Connecting via USB Serial
+
+If your Meshtastic node is connected via USB, select `serial` as the connection type and specify the correct port. Supported devices:
+
+- `/dev/ttyUSB0`, `/dev/ttyUSB1`
+- `/dev/ttyACM0`, `/dev/ttyACM1`
 
 ## Virtual Node Server
 
