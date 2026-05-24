@@ -2,8 +2,8 @@ name: Auto-update MeshMonitor version
 
 on:
   schedule:
-    - cron: '0 6 * * *'  # каждый день в 6:00 UTC
-  workflow_dispatch:       # можно запустить вручную
+    - cron: '0 6 * * *'
+  workflow_dispatch:
 
 jobs:
   update:
@@ -26,18 +26,26 @@ jobs:
           echo "version=$CURRENT" >> $GITHUB_OUTPUT
           echo "Current addon version: $CURRENT"
 
-      - name: Update config.yaml if version changed
+      - name: Update files if version changed
         if: steps.meshmonitor.outputs.version != steps.current.outputs.version
         run: |
           NEW_VERSION="${{ steps.meshmonitor.outputs.version }}"
+          DATE=$(date +%Y-%m-%d)
+
+          # Обновляем версию в config.yaml
           sed -i "s/^version: .*/version: \"${NEW_VERSION}\"/" meshmonitor/config.yaml
-          echo "Updated version to $NEW_VERSION"
+
+          # Добавляем запись в CHANGELOG.md
+          ENTRY="## ${NEW_VERSION} (${DATE})\n\n- Update to latest version from MeshMonitor (changelog: https://github.com/Yeraze/meshmonitor/releases/tag/v${NEW_VERSION})\n"
+          sed -i "s/# Changelog/# Changelog\n\n${ENTRY}/" meshmonitor/CHANGELOG.md
+
+          echo "Updated to $NEW_VERSION"
 
       - name: Commit and push
         if: steps.meshmonitor.outputs.version != steps.current.outputs.version
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add meshmonitor/config.yaml
+          git add meshmonitor/config.yaml meshmonitor/CHANGELOG.md
           git commit -m "chore: update MeshMonitor to v${{ steps.meshmonitor.outputs.version }}"
           git push
