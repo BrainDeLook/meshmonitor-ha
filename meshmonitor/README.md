@@ -1,6 +1,6 @@
 # MeshMonitor — Home Assistant Add-on
 
-[🇷🇺 Русская версия](README_RU.md)
+[🇷🇺 Русская версия](https://github.com/BrainDeLook/meshmonitor-ha/blob/main/README_RU.md)
 
 [![GitHub Release](https://img.shields.io/github/release/BrainDeLook/meshmonitor-ha.svg?style=for-the-badge)](https://github.com/BrainDeLook/meshmonitor-ha/releases)
 [![License](https://img.shields.io/github/license/BrainDeLook/meshmonitor-ha.svg?style=for-the-badge)](LICENSE)
