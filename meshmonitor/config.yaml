@@ -1,6 +1,6 @@
 name: "MeshMonitor"
 description: "Meshtastic Monitoring Dashboard"
-version: "4.9.1"
+version: "4.9.2"
 slug: "meshmonitor"
 url: https://github.com/BrainDeLook/meshmonitor-ha
 arch:
