@@ -1,0 +1,52 @@
+name: Auto-update addons
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Update all addons
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          CHANGED=0
+
+          for UPDATER_FILE in */updater.json; do
+            ADDON_PATH=$(dirname "$UPDATER_FILE")
+            UPSTREAM_REPO=$(jq -r '.upstream_repo' "$UPDATER_FILE")
+            CHANGELOG_URL=$(jq -r '.changelog_url' "$UPDATER_FILE")
+            VERSION_PREFIX=$(jq -r '.version_prefix // "v"' "$UPDATER_FILE")
+
+            LATEST=$(curl -s "https://api.github.com/repos/${UPSTREAM_REPO}/releases/latest" | jq -r '.tag_name' | sed "s/^${VERSION_PREFIX}//")
+            CURRENT=$(grep '^version:' "${ADDON_PATH}/config.yaml" | awk '{print $2}' | tr -d '"')
+
+            echo "[$ADDON_PATH] current=$CURRENT latest=$LATEST"
+
+            if [ "$LATEST" != "$CURRENT" ] && [ -n "$LATEST" ] && [ "$LATEST" != "null" ]; then
+              DATE=$(date +%Y-%m-%d)
+              URL=$(echo "$CHANGELOG_URL" | sed "s/{version}/$LATEST/g")
+
+              sed -i "s/^version: .*/version: \"${LATEST}\"/" "${ADDON_PATH}/config.yaml"
+
+              printf "# Changelog\n\n## %s (%s)\n\n- Update to upstream version (changelog: %s)\n\n" \
+                "$LATEST" "$DATE" "$URL" > /tmp/changelog_header.md
+              tail -n +2 "${ADDON_PATH}/CHANGELOG.md" >> /tmp/changelog_header.md
+              mv /tmp/changelog_header.md "${ADDON_PATH}/CHANGELOG.md"
+
+              git add "${ADDON_PATH}/config.yaml" "${ADDON_PATH}/CHANGELOG.md"
+              git commit -m "chore: update ${ADDON_PATH} to v${LATEST}"
+              CHANGED=1
+              echo "Updated $ADDON_PATH to $LATEST"
+            fi
+          done
+
+          if [ "$CHANGED" = "1" ]; then
+            git push
+          fi
