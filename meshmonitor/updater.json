@@ -1,0 +1,6 @@
+{
+  "upstream_repo": "Yeraze/meshmonitor",
+  "addon_path": "meshmonitor",
+  "changelog_url": "https://github.com/Yeraze/meshmonitor/releases/tag/v{version}",
+  "version_prefix": "v"
+}
