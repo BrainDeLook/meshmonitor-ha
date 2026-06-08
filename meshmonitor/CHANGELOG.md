@@ -1,5 +1,10 @@
 # Changelog
 
+## null (2026-06-08)
+
+- Update to latest version from MeshMonitor (changelog: https://github.com/Yeraze/meshmonitor/releases/tag/vnull)
+
+
 ## 4.9.2 (2026-06-07)
 
 - Update to latest version from MeshMonitor (changelog: https://github.com/Yeraze/meshmonitor/releases/tag/v4.9.2)
