@@ -4,3 +4,4 @@ Retry: diagnostics.
 Retry: exact verified chunks2 transfer.
 Retry: per-chunk checksum verification.
 Retry: split chunk06 exact transfer.
+Retry: v0.4.1 auth client fix.
