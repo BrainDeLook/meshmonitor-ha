@@ -5,3 +5,4 @@ Retry: exact verified chunks2 transfer.
 Retry: per-chunk checksum verification.
 Retry: split chunk06 exact transfer.
 Retry: v0.4.1 auth client fix.
+Retry: v0.4.2 use JWT as bearer token like official app.
