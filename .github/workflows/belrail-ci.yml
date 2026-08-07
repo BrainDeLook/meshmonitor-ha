@@ -45,6 +45,13 @@ jobs:
           unzip -t /tmp/belrail.zip
           mkdir -p /tmp/belrail
           unzip -q /tmp/belrail.zip -d /tmp/belrail
+      - name: Patch v0.4.1 auth fix
+        shell: bash
+        working-directory: /tmp/belrail/BelRailWatcher
+        run: |
+          sed -i 's/versionCode = 4/versionCode = 5/' app/build.gradle.kts
+          sed -i 's/versionName = "0.4.0"/versionName = "0.4.1"/' app/build.gradle.kts
+          sed -i 's/BelRailWatcher\/0.4 Android/BelRailWatcher\/0.4.1 Android/' app/src/main/java/com/example/belrailwatcher/net/RwConstants.kt
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -58,7 +65,7 @@ jobs:
       - name: Build and test
         working-directory: /tmp/belrail/BelRailWatcher
         env:
-          RW_USER_KEY: c2a3d81674b7f4c9e4af16bdba110d53
+          RW_USER_KEY: c0f1de1cbcf6c517baa7c95ab7d0509e
         run: gradle --no-daemon testDebugUnitTest assembleDebug
       - name: Verify APK
         shell: bash
@@ -69,7 +76,7 @@ jobs:
           sha256sum "$APK"
       - uses: actions/upload-artifact@v4
         with:
-          name: BelRailWatcher-0.4-debug
+          name: BelRailWatcher-0.4.1-debug
           path: /tmp/belrail/BelRailWatcher/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 7
