@@ -13,8 +13,13 @@ jobs:
       - name: Download and decode BelRailWatcher source
         shell: bash
         run: |
-          curl -fsSL "https://raw.githubusercontent.com/BrainDeLook/default/belrailwatcher-build/belrailwatcher-build/BelRailWatcher-v0.4-reviewed-source.zip.b64" -o /tmp/belrail.b64
+          : > /tmp/belrail.b64
+          for i in 00 01 02 03 04; do
+            curl -fsSL "https://raw.githubusercontent.com/BrainDeLook/default/belrailwatcher-build/belrailwatcher-build/chunks/chunk${i}" >> /tmp/belrail.b64
+          done
+          test "$(wc -c < /tmp/belrail.b64)" -eq 86572
           base64 -d /tmp/belrail.b64 > /tmp/belrail.zip
+          unzip -t /tmp/belrail.zip
           mkdir -p /tmp/belrail
           unzip -q /tmp/belrail.zip -d /tmp/belrail
       - uses: actions/setup-java@v4
