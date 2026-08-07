@@ -14,6 +14,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          files=(00 01 02 03 04 05 06a 06b 07 08 09 10)
           expected=(
             a7e970a5d0b97aa153c64d2eadcd4c596278008c2755f4501846ecfcbb651e42
             a650f9af23f15e967121af8000808f2d934d63143d7b84644e74f2fc746f0f95
@@ -21,21 +22,21 @@ jobs:
             8b7b18ac2567dab2b6b5026c840f35e66efa480b20c9d29fe5ec7333b3ad9176
             c866072097065454de00e2ae05e22ea4e41b7f2f2b16944fe71b4c8c41a1aa7a
             40e155cc8da64a0944257c5b584bc02b955740c16a4babe858dc014974be30cb
-            46919f0bb92deb847e81b2bdd4389bb0bc8caf5b2b8a2b3777fe6e26bfdb064a
+            ffdd460dc7ac302b7e15d53afbdef6477784eb7af76359f179b3fb9852704592
+            e2e5a88394900771ad556667ee8134da2c1a08eaada8d636bbb503b7c26a2306
             99adec277da243b084af5aca6ce89b952ebcb2b768982f90bc13b0a536b14ac9
             54e78b93f98281a569d979e3b4544ddad051c3c4c3220d50e6ff03d489e31243
             6f5b24bf0b789b46836b5a6e120c86814f7f39a17d8898dc9f988a975db6d7f4
             478fe16aeca47b176b37359b91a5770dd5eb768421dfbd1555ed2e8f7f823d68
           )
           : > /tmp/belrail.b64
-          idx=0
-          for i in 00 01 02 03 04 05 06 07 08 09 10; do
+          for idx in "${!files[@]}"; do
+            i="${files[$idx]}"
             curl -fsSL "https://raw.githubusercontent.com/BrainDeLook/default/belrailwatcher-build/belrailwatcher-build/chunks2/chunk${i}" -o "/tmp/chunk${i}"
             actual=$(sha256sum "/tmp/chunk${i}" | awk '{print $1}')
             echo "chunk${i}: $(wc -c < /tmp/chunk${i}) bytes $actual"
             test "$actual" = "${expected[$idx]}"
             cat "/tmp/chunk${i}" >> /tmp/belrail.b64
-            idx=$((idx+1))
           done
           test "$(wc -c < /tmp/belrail.b64)" -eq 86572
           echo "e3ad568315f63bfe2773b8e55602863e2f7278918010511c6afdf225381316c0  /tmp/belrail.b64" | sha256sum -c -
