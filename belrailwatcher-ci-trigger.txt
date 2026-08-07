@@ -2,3 +2,4 @@ Temporary CI trigger for BelRailWatcher APK build. Do not merge.
 Retry: chunked source transfer.
 Retry: diagnostics.
 Retry: exact verified chunks2 transfer.
+Retry: per-chunk checksum verification.
