@@ -3,3 +3,4 @@ Retry: chunked source transfer.
 Retry: diagnostics.
 Retry: exact verified chunks2 transfer.
 Retry: per-chunk checksum verification.
+Retry: split chunk06 exact transfer.
