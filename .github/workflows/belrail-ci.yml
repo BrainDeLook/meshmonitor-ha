@@ -45,13 +45,92 @@ jobs:
           unzip -t /tmp/belrail.zip
           mkdir -p /tmp/belrail
           unzip -q /tmp/belrail.zip -d /tmp/belrail
-      - name: Patch v0.4.1 auth fix
+
+      - name: Patch v0.4.2 JWT auth semantics
         shell: bash
         working-directory: /tmp/belrail/BelRailWatcher
         run: |
-          sed -i 's/versionCode = 4/versionCode = 5/' app/build.gradle.kts
-          sed -i 's/versionName = "0.4.0"/versionName = "0.4.1"/' app/build.gradle.kts
-          sed -i 's/BelRailWatcher\/0.4 Android/BelRailWatcher\/0.4.1 Android/' app/src/main/java/com/example/belrailwatcher/net/RwConstants.kt
+          python3 - <<'PY'
+          from pathlib import Path
+
+          models = Path('app/src/main/java/com/example/belrailwatcher/model/Models.kt')
+          s = models.read_text()
+          old = '''data class AccountSession(
+              val accessToken: String,
+              val jwt: String,
+              val refreshToken: String = ""
+          ) {
+              val isUsable: Boolean get() = accessToken.isNotBlank()
+          }
+          '''
+          new = '''data class AccountSession(
+              val accessToken: String,
+              val jwt: String,
+              val refreshToken: String = ""
+          ) {
+              val bearerToken: String get() = jwt.ifBlank { accessToken }
+              val isUsable: Boolean get() = bearerToken.isNotBlank()
+          }
+          '''
+          if old not in s:
+              raise SystemExit('AccountSession block not found')
+          models.write_text(s.replace(old, new))
+
+          api = Path('app/src/main/java/com/example/belrailwatcher/net/RwAccountApi.kt')
+          s = api.read_text()
+          s = s.replace('bearer = session.accessToken', 'bearer = session.bearerToken')
+
+          old_login = '''        requireSuccess(response, authCall = true)
+                  return parseSession(response.body)
+                      ?: throw RwApiException(extractMessage(response.body).ifBlank { "БелЖД не вернул токен авторизации" })
+          '''
+          new_login = '''        requireSuccess(response, authCall = true)
+                  return parseSession(response.body) ?: run {
+                      val root = runCatching { JSONObject(response.body) }.getOrNull()
+                      val apiStatus = root?.optInt("status", 0) ?: 0
+                      val message = extractMessage(response.body)
+                      val suffix = if (apiStatus != 0) " (status=$apiStatus)" else ""
+                      throw RwApiException(message.ifBlank { "БелЖД не вернул JWT авторизации$suffix" })
+                  }
+          '''
+          if old_login not in s:
+              raise SystemExit('login block not found')
+          s = s.replace(old_login, new_login)
+
+          old_parser = '''    internal fun parseSession(body: String): AccountSession? {
+                  val root = runCatching { JSONObject(body) }.getOrNull() ?: return null
+                  val auth = root.optJSONObject("auth") ?: root.optJSONObject("data")?.optJSONObject("auth") ?: root
+                  val access = firstString(auth, "accessToken", "access_token", "token")
+                  val jwt = firstString(auth, "jwt", "jwtToken", "jwt_token")
+                  val refresh = firstString(auth, "refreshToken", "refresh_token")
+                  if (access.isBlank()) return null
+                  return AccountSession(accessToken = access, jwt = jwt, refreshToken = refresh)
+              }
+          '''
+          new_parser = '''    internal fun parseSession(body: String): AccountSession? {
+                  val root = runCatching { JSONObject(body) }.getOrNull() ?: return null
+                  val apiStatus = root.optInt("status", 200)
+                  if (apiStatus != 200) return null
+                  val auth = root.optJSONObject("auth") ?: root.optJSONObject("data")?.optJSONObject("auth") ?: root
+                  val access = firstString(auth, "accessToken", "access_token", "token")
+                  val jwt = firstString(auth, "jwt", "jwtToken", "jwt_token")
+                  val refresh = firstString(auth, "refreshToken", "refresh_token")
+                  if (jwt.isBlank() && access.isBlank()) return null
+                  return AccountSession(accessToken = access, jwt = jwt, refreshToken = refresh)
+              }
+          '''
+          if old_parser not in s:
+              raise SystemExit('parseSession block not found')
+          api.write_text(s.replace(old_parser, new_parser))
+
+          gradle = Path('app/build.gradle.kts')
+          s = gradle.read_text().replace('versionCode = 4', 'versionCode = 6').replace('versionName = "0.4.0"', 'versionName = "0.4.2"')
+          gradle.write_text(s)
+
+          consts = Path('app/src/main/java/com/example/belrailwatcher/net/RwConstants.kt')
+          consts.write_text(consts.read_text().replace('BelRailWatcher/0.4 Android', 'BelRailWatcher/0.4.2 Android'))
+          PY
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -76,7 +155,7 @@ jobs:
           sha256sum "$APK"
       - uses: actions/upload-artifact@v4
         with:
-          name: BelRailWatcher-0.4.1-debug
+          name: BelRailWatcher-0.4.2-debug
           path: /tmp/belrail/BelRailWatcher/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 7
