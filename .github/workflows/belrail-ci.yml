@@ -1,0 +1,47 @@
+name: BelRailWatcher temporary CI
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and decode BelRailWatcher source
+        shell: bash
+        run: |
+          curl -fsSL "https://raw.githubusercontent.com/BrainDeLook/default/belrailwatcher-build/belrailwatcher-build/BelRailWatcher-v0.4-reviewed-source.zip.b64" -o /tmp/belrail.b64
+          base64 -d /tmp/belrail.b64 > /tmp/belrail.zip
+          mkdir -p /tmp/belrail
+          unzip -q /tmp/belrail.zip -d /tmp/belrail
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+      - uses: android-actions/setup-android@v3
+      - name: Install Android 16 SDK
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+      - name: Build and test
+        working-directory: /tmp/belrail/BelRailWatcher
+        env:
+          RW_USER_KEY: c2a3d81674b7f4c9e4af16bdba110d53
+        run: gradle --no-daemon testDebugUnitTest assembleDebug
+      - name: Verify APK
+        shell: bash
+        run: |
+          APK=/tmp/belrail/BelRailWatcher/app/build/outputs/apk/debug/app-debug.apk
+          test -s "$APK"
+          $ANDROID_SDK_ROOT/build-tools/36.0.0/apksigner verify --verbose "$APK"
+          sha256sum "$APK"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BelRailWatcher-0.4-debug
+          path: /tmp/belrail/BelRailWatcher/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7
