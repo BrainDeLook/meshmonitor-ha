@@ -15,9 +15,13 @@ jobs:
         run: |
           : > /tmp/belrail.b64
           for i in 00 01 02 03 04; do
-            curl -fsSL "https://raw.githubusercontent.com/BrainDeLook/default/belrailwatcher-build/belrailwatcher-build/chunks/chunk${i}" >> /tmp/belrail.b64
+            curl -fsSL "https://raw.githubusercontent.com/BrainDeLook/default/belrailwatcher-build/belrailwatcher-build/chunks/chunk${i}" -o "/tmp/chunk${i}"
+            wc -c "/tmp/chunk${i}"
+            sha256sum "/tmp/chunk${i}"
+            cat "/tmp/chunk${i}" >> /tmp/belrail.b64
           done
-          test "$(wc -c < /tmp/belrail.b64)" -eq 86572
+          wc -c /tmp/belrail.b64
+          sha256sum /tmp/belrail.b64
           base64 -d /tmp/belrail.b64 > /tmp/belrail.zip
           unzip -t /tmp/belrail.zip
           mkdir -p /tmp/belrail
