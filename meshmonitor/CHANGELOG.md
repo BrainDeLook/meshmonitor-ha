@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.15.1 (2026-08-22)
+
+- Update to upstream version (changelog: https://github.com/Yeraze/meshmonitor/releases/tag/v4.15.1)
+
+
 ## 4.14.1 (2026-08-14)
 
 - Update to upstream version (changelog: https://github.com/Yeraze/meshmonitor/releases/tag/v4.14.1)
